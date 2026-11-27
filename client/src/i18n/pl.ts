@@ -1,0 +1,146 @@
+// Every string the frames show, in Polish. Components import `t` and never
+// hold text of their own, so English can be added beside this file later.
+
+export const t = {
+  plannerTitle: 'Planer cięcia',
+  demand: 'Zapotrzebowanie',
+  orders: 'Zamówienia',
+  ordersEmpty: 'Brak otwartych zamówień do zaplanowania.',
+  ordersTruncated: 'Pokazano tylko część zamówień.',
+  ordersLoading: 'Wczytywanie zamówień…',
+  loadDemand: 'Wczytaj detale',
+  loadingDemand: 'Wczytywanie detali i stanów…',
+  chooseOrders: 'Zaznacz zamówienia i wczytaj ich detale, aby zobaczyć plan cięcia.',
+  filterOrders: 'Szukaj zamówienia lub klienta',
+  due: 'Termin',
+  groups: 'Grupy materiałowe',
+  pieces: (n: number) => `${n} ${plural(n, 'detal', 'detale', 'detali')}`,
+  skipped: 'Pominięte pozycje',
+  skippedHelp: 'Te pozycje nie są cięte ze sztang albo brakuje im danych.',
+
+  plan: 'Plan',
+  machine: 'Maszyna',
+  noMachine: 'Brak piły',
+  noSaws: 'Nie ma maszyn z procesem piły. Dodaj piłę z szerokością rzazu, aby planować cięcie.',
+  noMachines: 'Brak maszyny dla tej grupy. Dodaj piłę, gilotynę, laser lub plazmę z ich ustawieniami.',
+  machineUnsuitable: 'Ta maszyna nie spełnia zakresu grubości lub formatu tej grupy.',
+  process: { saw: 'piła', guillotine: 'gilotyna', laser: 'laser', plasma: 'plazma' } as Record<string, string>,
+  edgeTrim: 'Obcięcie krawędzi [mm]',
+  spacing: 'Odstęp między detalami [mm]',
+  rotation: 'Obrót dozwolony',
+  rotationHelp: 'Detale z wyłączonym obrotem w kartotece i tak się nie obracają.',
+  sheets: (n: number) => `${n} ${plural(n, 'arkusz', 'arkusze', 'arkuszy')}`,
+  sheetSizes: 'Arkusze',
+  cutOrder: 'Kolejność cięć',
+  cutOrderHelp: 'Liczby na liniach to kolejność cięć gilotyny.',
+  edgeMargin: 'Obcięcie krawędzi',
+  colSize: 'Wymiary [mm]',
+  rotated: 'obrócony',
+  shaped: 'Detale kształtowe',
+  shapedHelp: 'Detale z otworami lub nieregularnym obrysem rozkłada oprogramowanie CAM lasera lub plazmy; planer ich nie rozmieszcza.',
+  remnantStock: 'pozostałość',
+  sheetAria: (count: number, stock: string) => `${count} × ${stock}`,
+  partAria: (no: number, item: string, size: string, order: string) => `Detal ${no}: ${item}, ${size} mm, zamówienie ${order}`,
+  stale: 'Plan nieaktualny',
+  staleHelp: 'Od zapisania planu zmieniły się zamówienia lub stany magazynowe. Przelicz go w planerze cięcia.',
+  settings: 'Ustawienia',
+  kerf: 'Szerokość rzazu [mm]',
+  startTrim: 'Obcięcie początku sztangi [mm]',
+  minRemnant: 'Najkrótsza pozostałość [mm]',
+  minRemnantHelp: '0 oznacza, że każdy odpad to złom.',
+  remnantsFirst: 'Najpierw pozostałości',
+  stockSizes: 'Sztangi',
+  inStock: (n: number) => `w magazynie: ${n}`,
+  unlimited: 'Bez limitu (dokup)',
+  noStock: 'Brak sztang tego przekroju w magazynie.',
+  unplaced: 'Nie zmieszczono',
+  unplacedTooLong: 'dłuższe niż każda sztanga',
+  unplacedTooLarge: 'większe niż każdy arkusz',
+  unplacedNoStock: 'zabrakło sztang',
+  optimal: 'Najmniejsza możliwa liczba sztang',
+  bars: (n: number) => `${n} ${plural(n, 'sztanga', 'sztangi', 'sztang')}`,
+  pieceList: 'Detale',
+  colNo: 'Nr',
+  colItem: 'Wyrób',
+  colLength: 'Długość [mm]',
+  colQuantity: 'Ilość',
+  colOrder: 'Zamówienie',
+  colCustomer: 'Klient',
+  remnant: 'Pozostałość',
+  scrap: 'Złom',
+  trim: 'Obcięcie',
+  legend: 'Legenda',
+  legendPiece: 'Detal',
+  legendKerfNote: (kerf: string) => `Rzaz ${kerf} mm między detalami jest zbyt wąski, by go narysować.`,
+  pieceAria: (no: number, item: string, length: string, order: string) => `Detal ${no}: ${item}, ${length} mm, zamówienie ${order}`,
+  layoutAria: (count: number, stock: string) => `${count} × ${stock}`,
+
+  summary: 'Podsumowanie',
+  wholePlan: 'Cały plan',
+  barsUsed: 'Sztangi',
+  sheetsUsed: 'Arkusze',
+  material: 'Materiał',
+  utilisation: 'Wykorzystanie materiału',
+  remnants: 'Pozostałości',
+  scrapLabel: 'Złom i rzaz',
+  baseline: 'Cięcie po kolei',
+  saving: 'Oszczędność',
+  savingHelp: 'Względem cięcia pozycji po kolei, każdej na kolejnej sztandze, która ją mieści.',
+  recompute: 'Przelicz',
+  savePlan: 'Zapisz plan',
+  saved: 'Plan zapisany.',
+  createOrders: 'Utwórz zlecenie produkcyjne',
+  creating: 'Tworzenie zleceń…',
+  created: (n: number) => (n === 1 ? 'Utworzono zlecenie produkcyjne.' : `Utworzono ${n} zlecenia produkcyjne.`),
+  productionOrders: 'Zlecenia produkcyjne',
+  planOrdered: 'Z tego planu utworzono zlecenia produkcyjne. Aby zmienić plan, zacznij nowy.',
+  newPlan: 'Nowy plan',
+  computing: 'Liczenie planu…',
+
+  tabEmpty: 'To zamówienie nie ma jeszcze planu cięcia.',
+  tabEmptyHelp: 'Otwórz Planer cięcia z menu, zaznacz to zamówienie i zapisz plan.',
+  tabPlans: 'Plany cięcia',
+  tabCreated: (date: string) => `Utworzony ${date}`,
+  tabOrdered: 'Zlecenia utworzone',
+  tabDraft: 'Zapisany, bez zleceń',
+  open: 'Otwórz',
+
+  error: 'Nie udało się wykonać polecenia. Spróbuj ponownie.',
+
+  sheetTitle: 'Karta cięcia',
+  sheetIntro: 'Karta cięcia to dokument PDF dla operatora: rysunki układów z liczbą powtórzeń, lista detali, kolejność cięć gilotyny i pola do podpisu.',
+  sheetCreate: 'Utwórz kartę cięcia',
+  sheetWorking: 'Tworzenie karty cięcia…',
+  sheetReady: 'Karta cięcia jest gotowa.',
+  sheetDownload: 'Pobierz kartę cięcia',
+  sheetFailed: 'Nie udało się utworzyć karty cięcia. To zlecenie mogło nie powstać z planu cięcia.',
+  sheetExpired: 'Plik wygasł. Utwórz kartę ponownie.',
+  close: 'Zamknij',
+  unit: { mm: 'mm', kg: 'kg', m: 'm' },
+} as const;
+
+function plural(n: number, one: string, few: string, many: string): string {
+  if (n === 1) return one;
+  const tens = n % 100;
+  const units = n % 10;
+  return units >= 2 && units <= 4 && (tens < 12 || tens > 14) ? few : many;
+}
+
+const numberFormat = new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 1 });
+const integerFormat = new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 });
+const percentFormat = new Intl.NumberFormat('pl-PL', { style: 'percent', maximumFractionDigits: 1 });
+const dateFormat = new Intl.DateTimeFormat('pl-PL', { dateStyle: 'medium' });
+
+export const format = {
+  number: (value: number) => numberFormat.format(value),
+  mm: (value: number) => integerFormat.format(value),
+  kg: (value: number) => `${numberFormat.format(value)} kg`,
+  m: (value: number) => `${numberFormat.format(value / 1000)} m`,
+  m2: (value: number) => `${new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 2 }).format(value / 1e6)} m²`,
+  size: (length: number, width: number) => `${integerFormat.format(length)} × ${integerFormat.format(width)}`,
+  percent: (value: number) => percentFormat.format(value),
+  date: (iso: string) => {
+    const date = new Date(iso);
+    return Number.isNaN(date.getTime()) ? iso : dateFormat.format(date);
+  },
+};
