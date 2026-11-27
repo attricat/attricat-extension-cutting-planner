@@ -1,0 +1,913 @@
+{
+  "manifest_version": 1,
+  "name": "Planer cięcia",
+  "version": "0.2.0",
+  "description": "Planuje cięcie sztang i profili z magazynu, rysuje każdą sztangę w skali, porównuje odpad z cięciem po kolei i tworzy zlecenia produkcyjne z planu.",
+  "icons": {
+    "48": "assets/icon-48.svg"
+  },
+  "attricat": {
+    "id": "attricat-extension-cutting-planner",
+    "host_api": ">=1.2.0, <2.0.0"
+  },
+  "permissions": [
+    "attricat.read",
+    "attricat.write",
+    "storage.extension",
+    "configuration.read",
+    "logging.write",
+    "client.commands",
+    "client.events",
+    "client.navigation",
+    "client.notification",
+    "client.record_tab",
+    "client.record_action",
+    "client.action_dialog",
+    "client.operations.start",
+    "client.operations.read",
+    "artifacts.write"
+  ],
+  "artifacts": [
+    {
+      "id": "server",
+      "kind": "server_wasm",
+      "path": "dist/server.wasm"
+    },
+    {
+      "id": "planner",
+      "kind": "client_frame",
+      "path": "dist/planner.js"
+    },
+    {
+      "id": "plan-tab",
+      "kind": "client_frame",
+      "path": "dist/plan-tab.js"
+    },
+    {
+      "id": "cutting-sheet-dialog",
+      "kind": "client_frame",
+      "path": "dist/cutting-sheet-dialog.js"
+    }
+  ],
+  "configuration": {
+    "version": 1,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "orders": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "blueprint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "number": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "customer": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "status": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "due_date": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "open_statuses": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "maxItems": 32
+            }
+          },
+          "required": [
+            "blueprint"
+          ]
+        },
+        "order_lines": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "blueprint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "order": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "item": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "quantity": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          "required": [
+            "blueprint"
+          ]
+        },
+        "bars": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "pieces": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 16,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "blueprint": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "via": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  }
+                },
+                "required": [
+                  "blueprint"
+                ]
+              }
+            },
+            "stock": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "maxItems": 32,
+              "minItems": 1
+            },
+            "length": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "section": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "maxItems": 32,
+              "minItems": 1
+            },
+            "weight": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          "required": [
+            "pieces",
+            "stock",
+            "section"
+          ]
+        },
+        "sheets": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "pieces": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 16,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "blueprint": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "via": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  }
+                },
+                "required": [
+                  "blueprint"
+                ]
+              }
+            },
+            "stock": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "maxItems": 32,
+              "minItems": 1
+            },
+            "length": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "width": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "thickness": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "weight": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "rotate": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "shaped": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "match": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "maxItems": 32,
+              "minItems": 1
+            },
+            "density": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "via": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "attribute": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "required": [
+                "via",
+                "attribute"
+              ]
+            }
+          },
+          "required": [
+            "pieces",
+            "stock",
+            "match"
+          ]
+        },
+        "remnants": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "blueprint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "length": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "width": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "weight": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "copy": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "maxItems": 32
+            }
+          },
+          "required": [
+            "blueprint"
+          ]
+        },
+        "stock_levels": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "blueprint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "item": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "quantity": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "reserved": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "per_piece": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          "required": [
+            "blueprint"
+          ]
+        },
+        "machines": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "blueprint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "process": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "kerf": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "spacing": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "edge_trim": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "guillotine_only": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "min_thickness": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "max_thickness": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "max_width": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "max_length": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "processes": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "saw": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "maxItems": 32
+                },
+                "guillotine": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "maxItems": 32
+                },
+                "laser": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "maxItems": 32
+                },
+                "plasma": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "maxItems": 32
+                }
+              },
+              "required": []
+            }
+          },
+          "required": [
+            "blueprint"
+          ]
+        },
+        "production": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "order": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "blueprint": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "number": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "status": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "customer_orders": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "machine": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "plan": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "initial_status": {
+                  "type": "string",
+                  "maxLength": 128
+                }
+              },
+              "required": [
+                "blueprint"
+              ]
+            },
+            "material": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "blueprint": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "order": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "item": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "quantity": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "by_weight": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "blueprint"
+              ]
+            },
+            "output": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "blueprint": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "order": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "item": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "quantity": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "kind": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "attribute": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    },
+                    "product": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    },
+                    "scrap": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    },
+                    "remnant": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    }
+                  },
+                  "required": [
+                    "product",
+                    "scrap"
+                  ]
+                }
+              },
+              "required": [
+                "blueprint"
+              ]
+            },
+            "scrap_item": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "blueprint": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "attribute": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "value": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "required": [
+                "blueprint",
+                "attribute",
+                "value"
+              ]
+            }
+          },
+          "required": [
+            "order",
+            "material",
+            "output"
+          ]
+        }
+      },
+      "required": [
+        "orders",
+        "order_lines",
+        "stock_levels",
+        "machines",
+        "production"
+      ]
+    }
+  },
+  "server": {
+    "commands": [
+      {
+        "id": "list-orders",
+        "handler": "list-orders",
+        "request_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {},
+          "required": []
+        },
+        "response_schema": {
+          "type": "object"
+        }
+      },
+      {
+        "id": "load-demand",
+        "handler": "load-demand",
+        "request_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "order_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 36,
+                "maxLength": 36
+              },
+              "minItems": 1,
+              "maxItems": 50
+            }
+          },
+          "required": [
+            "order_ids"
+          ]
+        },
+        "response_schema": {
+          "type": "object"
+        }
+      },
+      {
+        "id": "load-stock",
+        "handler": "load-stock",
+        "request_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "group_keys": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 1024
+              },
+              "maxItems": 200
+            }
+          },
+          "required": [
+            "group_keys"
+          ]
+        },
+        "response_schema": {
+          "type": "object"
+        }
+      },
+      {
+        "id": "save-plan",
+        "handler": "save-plan",
+        "request_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "plan": {
+              "type": "object",
+              "required": [
+                "id",
+                "groups"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9-]{8,40}$"
+                }
+              }
+            }
+          },
+          "required": [
+            "plan"
+          ]
+        },
+        "response_schema": {
+          "type": "object"
+        }
+      },
+      {
+        "id": "get-plan",
+        "handler": "get-plan",
+        "request_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "plan_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9-]{8,40}$"
+            }
+          },
+          "required": [
+            "plan_id"
+          ]
+        },
+        "response_schema": {
+          "type": "object"
+        }
+      },
+      {
+        "id": "list-plans",
+        "handler": "list-plans",
+        "request_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "record_id": {
+              "type": "string",
+              "minLength": 36,
+              "maxLength": 36
+            }
+          },
+          "required": []
+        },
+        "response_schema": {
+          "type": "object"
+        }
+      },
+      {
+        "id": "check-plan",
+        "handler": "check-plan",
+        "request_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "plan_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9-]{8,40}$"
+            }
+          },
+          "required": [
+            "plan_id"
+          ]
+        },
+        "response_schema": {
+          "type": "object"
+        }
+      },
+      {
+        "id": "create-production-orders",
+        "handler": "create-production-orders",
+        "request_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "plan_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9-]{8,40}$"
+            }
+          },
+          "required": [
+            "plan_id"
+          ]
+        },
+        "response_schema": {
+          "type": "object"
+        }
+      }
+    ],
+    "operations": [
+      {
+        "id": "cutting-sheet",
+        "handler": "cutting-sheet",
+        "request_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {},
+          "required": []
+        },
+        "max_request_bytes": 256,
+        "max_checkpoint_bytes": 4096,
+        "interactive": {
+          "version": 1,
+          "max_selection": 1
+        }
+      }
+    ]
+  },
+  "ui": [
+    {
+      "id": "cutting-planner",
+      "version": 1,
+      "kind": "route",
+      "artifact": "planner",
+      "title": "Planer cięcia"
+    },
+    {
+      "id": "cutting-planner-nav",
+      "version": 1,
+      "kind": "navigation",
+      "route": "cutting-planner",
+      "title": "Planer cięcia"
+    },
+    {
+      "id": "plan-tab",
+      "version": 1,
+      "kind": "tab",
+      "artifact": "plan-tab",
+      "outlet": "record_tab",
+      "view": "detail",
+      "title": "Plan cięcia"
+    },
+    {
+      "id": "cutting-sheet-dialog",
+      "version": 1,
+      "kind": "dialog",
+      "artifact": "cutting-sheet-dialog",
+      "outlet": "action_dialog",
+      "title": "Karta cięcia"
+    },
+    {
+      "id": "cutting-sheet",
+      "version": 1,
+      "kind": "action",
+      "outlet": "record_action",
+      "view": "detail",
+      "title": "Karta cięcia…",
+      "icon": "download",
+      "invoke": {
+        "dialog": "cutting-sheet-dialog"
+      }
+    }
+  ]
+}
